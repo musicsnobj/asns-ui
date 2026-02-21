@@ -13,19 +13,25 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchHit[]>([]);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [numResults, setNumResults] = useState<number>(10);
   const [selectedSpeakers, setSelectedSpeakers] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
 
-  async function runSearch() {
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!query.trim()) return;
+
+    setIsLoading(true);
     const filters: SearchFilters = {
       speakers: selectedSpeakers.length ? selectedSpeakers : undefined,
       start_date: startDate ? dateToNumber(startDate) : undefined,
       end_date: endDate ? dateToNumber(endDate) : undefined,
     };
     const data = await search(query, numResults, filters);
+    setIsLoading(false);
     setResults(data.hits);
   }
 
@@ -38,7 +44,7 @@ export default function Home() {
   return (
     <main className="p-10">
       <div className="flex flex-col items-center justify-center mt-10">
-        <div className="flex w-full max-w-lg">
+        <form onSubmit={handleSubmit} className="flex w-full max-w-lg">
           <input
             className="border p-2 w-96 rounded-l"
             value={query}
@@ -46,12 +52,13 @@ export default function Home() {
             placeholder="Search episodes..."
           />
           <button
-            onClick={runSearch}
+            type="submit"
+            disabled={isLoading}
             className="px-4 py-2 bg-blue-600 text-white rounded-r"
           >
             Search
           </button>
-        </div>
+        </form>
 
         {/* Advanced search toggle */}
         <button

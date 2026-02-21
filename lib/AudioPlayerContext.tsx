@@ -28,6 +28,7 @@ interface AudioPlayerContextValue extends AudioPlayerState {
   playFromHit: (hit: SearchHit) => Promise<void>;
   pause: () => void;
   play: () => void;
+  close: () => void;
   seek: (time: number) => void;
   togglePlayPause: () => void;
   setCurrentTime: (time: number) => void;
@@ -59,13 +60,23 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
         setCurrentHit(hit);
         setTimeout(() => {
           if (audioRef.current) {
-            console.log("audio loaded...?");
             const audio = audioRef.current;
             const handleLoadedMetadata = () => {
-              console.log("loadedmetadata fired!");
-              audio.currentTime = timestampToSeconds(hit.timestamp);
-              audio.play();
               setIsLoading(false);
+              if (audio.duration) {
+                setDuration(audio.duration);
+              }
+              audio.currentTime = timestampToSeconds(hit.timestamp);
+              audio.addEventListener("timeupdate", () =>
+                setCurrentTime(audio.currentTime),
+              );
+              audio.addEventListener("durationchange", () =>
+                setDuration(audio.duration),
+              );
+              audio.addEventListener("play", () => setIsPlaying(true));
+              audio.addEventListener("pause", () => setIsPlaying(false));
+              audio.addEventListener("ended", () => setIsPlaying(false));
+              audio.play();
               audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
             };
 
@@ -81,6 +92,11 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     },
     [audioRef.current],
   );
+
+  const close = useCallback(() => {
+    setCurrentHit(null);
+    setAudioUrl(null);
+  }, []);
 
   const pause = useCallback(() => {
     audioRef.current?.pause();
@@ -119,6 +135,7 @@ export function AudioPlayerProvider({ children }: { children: ReactNode }) {
     pause,
     play,
     seek,
+    close,
     togglePlayPause,
     setCurrentTime,
     setDuration,

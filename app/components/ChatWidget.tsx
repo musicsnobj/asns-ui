@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { useState, useRef } from "react";
 import { ChatMessage } from "@/lib/types";
 import { useChat } from "@/lib/hooks";
+import PlayButton from "@/app/components/PlayButton";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -54,6 +55,7 @@ export default function ChatWidget() {
                 <div className="mt-1 text-[10px] text-gray-400 break-all">
                   {source.episode_name}
                 </div>
+                <PlayButton hit={source} />
               </div>
             ))}
           </div>

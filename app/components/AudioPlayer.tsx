@@ -15,36 +15,8 @@ export default function AudioPlayer() {
     audioRef,
     togglePlayPause,
     seek,
-    setCurrentTime,
-    setDuration,
-    setIsPlaying,
+    close,
   } = useAudioPlayer();
-
-  // Update state when audio element changes
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleDurationChange = () => setDuration(audio.duration);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleEnded = () => setIsPlaying(false);
-
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("durationchange", handleDurationChange);
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("ended", handleEnded);
-
-    return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("durationchange", handleDurationChange);
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, [audioRef, setCurrentTime, setDuration, setIsPlaying]);
 
   const formatTime = (seconds: number) => {
     if (!isFinite(seconds)) return "0:00";
@@ -64,10 +36,29 @@ export default function AudioPlayer() {
   }
 
   return (
-    <div className="fixed right-0 top-0 h-full w-80 bg-white border-l shadow-lg flex flex-col">
+    <div className="fixed left-0 bottom-10 top-10 w-80 bg-white border-l shadow-lg flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b bg-gray-50">
-        <h2 className="font-bold text-lg">Now Playing</h2>
+      <div className="p-4 border-b bg-gray-50 flex justify-between">
+        <p className="text-lg font-semibold">Now Playing</p>
+        <button
+          className="text-gray-300 hover:text-gray-400 focus:outline-none focus:text-gray-400"
+          onClick={close}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
       </div>
 
       {/* Content */}
